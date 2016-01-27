@@ -1,0 +1,74 @@
+﻿@model Sprint.Models.IndexViewModel
+<div class="text-md-center">
+    <h2>
+        <span class="mega-octicon octicon-git-commit"></span>Sprint:  <strong>@Model.Repository.FullName</strong>
+        <a href="/" class="btn btn-sm btn-primary-outline">All repos</a>
+    </h2>
+</div>
+<div class="card-group p-t-2 p-b-2 text-xs-center">
+    <div class="card card-block text-center card-success inverse-text">
+        <h4 class="card-title"><span class="mega-octicon  octicon-issue-opened"></span> Open Issues</h4>
+        <h1 class="card-text">@Model.OpenIssues.Count</h1>
+    </div>
+    <div class="card card-block text-center  card-info-outline">
+        <h4 class="card-title"><span class="mega-octicon  octicon-git-pull-request"></span> Open PR's</h4>
+        <h1 class="card-text">@Model.OpenPRs.Count</h1>
+    </div>
+    <div class="card card-block text-center card-danger inverse-text">
+        <h4 class="card-title"><span class="mega-octicon  octicon-issue-closed"></span> Recently Closed</h4>
+        <h1 class="card-text">@Model.RecentlyClosed.Count</h1>
+    </div>
+</div>
+@if(Model.Contributors.Any())
+{
+    <div class="m-a-2">
+        @foreach (var item in Model.Contributors)
+        {
+            <img src="@item.AvatarUrl" style="height:20px;width:20px;" title="@item.Login" />
+        }
+    </div>
+}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-block">
+                <h4 class="card-title">Current Sprint</h4>
+            </div>
+            @if (Model.Sprint != null && Model.Sprint.Issues.Any())
+            {
+                <ul class="list-group list-group-flush">
+                    @foreach (var item in Model.CurrentSprint)
+                    {
+                        <li class="list-group-item">
+                            <a href="@Url.Action("RemoveIssue", new { ownerName = Model.Repository.Owner.Login, repoName = Model.Repository.Name, issueId = item.Number })" class="text-warning"><span class="octicon octicon-remove-close"></span></a>
+                            <a href="@item.HtmlUrl">#@item.Number</a> <span>@item.Title</span>
+                            <a href="@Url.Action("CompletedIssue", new { ownerName = Model.Repository.Owner.Login, repoName = Model.Repository.Name, issueId = item.Number })" class="btn btn-success-outline btn-sm"><span class="octicon octicon-issue-closed"></span></a>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <div class="card-block">
+                    <p class="card-text"><span class="octicon octicon-alert text-info"></span> <span class="bg-info">This sprint has no issues</span></p>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-block">
+                <h4 class="card-title">All Open Issues</h4>
+            </div>
+            <ul class="list-group all-open-issues  list-group-flush">
+                @foreach (var item in Model.OpenSprintIssues)
+            {
+                    <li class="list-group-item">
+                        <a href="@Url.Action("AddIssue", new { ownerName = Model.Repository.Owner.Login, repoName = Model.Repository.Name, issueId = item.Number })" class="text-primary"><span class="octicon octicon-plus"></span></a>
+                        <a href="@item.HtmlUrl">#@item.Number</a> <span>@item.Title</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>

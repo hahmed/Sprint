@@ -1,0 +1,19 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprint</title>
+    @Scripts.Render("~/bundles/modernizr")
+    @Styles.Render("~/Content/app.css")
+</head>
+<body>
+    <div class="container body-content p-a-3 m-t-1">
+        <div>
+            @RenderBody()
+        </div>
+    </div>
+    @Scripts.Render("~/bundles/app.js")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

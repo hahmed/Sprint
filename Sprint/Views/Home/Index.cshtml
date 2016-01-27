@@ -1,0 +1,51 @@
+﻿@model IReadOnlyList<Octokit.Repository>
+<div class="text-md-center">
+    <h2>
+        <span class="mega-octicon octicon-git-commit"></span>Sprint all tha way.
+    </h2>
+</div>
+@if (!Model.Any())
+{
+    <div class="card card-block">
+        <div class="card-block">
+            <h4 class="card-title">You have no repos... might we suggest some yo <3</h4>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+                <h4>
+                    <a href="/Octokit/Octokit.net/" class="text-primary"><span class="octicon octicon-circuit-board"></span> <span>Octokit/Octokit.net</span></a>
+                </h4>
+            </li>
+            <li class="list-group-item">
+                <h4>
+                    <a href="/ruby/ruby/" class="text-primary"><span class="octicon octicon-circuit-board"></span> <span>Ruby/Ruby</span></a>
+                </h4>
+            </li>
+            <li class="list-group-item">
+                <h4>
+                    <a href="/rails/rails/" class="text-primary"><span class="octicon octicon-circuit-board"></span> <span>Rails/Rails</span></a>
+                </h4>
+            </li>
+            <li class="list-group-item">
+                <h4>
+                    <a href="/jquery/jquery/" class="text-primary"><span class="octicon octicon-circuit-board"></span> <span>Jquery/Jquery</span></a>
+                </h4>
+            </li>
+        </ul>
+    </div>
+}
+else
+{
+    <div class="card">
+        <ul class="list-group list-group-flush">
+            @foreach (var item in Model)
+                {
+                <li class="list-group-item">
+                    <h4>
+                        <a href="@Url.Action("List", new { ownerName = item.Owner.Login, repoName = item.Name })" class="text-primary"><span class="octicon octicon-circuit-board"></span> <span>@item.FullName</span></a>
+                    </h4>
+                </li>
+            }
+        </ul>
+    </div>
+}
