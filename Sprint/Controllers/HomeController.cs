@@ -58,7 +58,7 @@ namespace Sprint.Controllers
             var vm = new IndexViewModel();
             var issues = await _githubClient.Issue.GetAllForRepository(owner.Login, repoName,
                 new RepositoryIssueRequest { State = ItemState.Open });
-            vm.OpenIssues = issues;
+            vm.OpenIssues = issues.Where(x => x.PullRequest == null).ToList();
             vm.OpenPRs = issues.Where(x => x.PullRequest != null).ToList();
             vm.RecentlyClosed = await _githubClient.Issue.GetAllForRepository(owner.Login, repoName,
                 new RepositoryIssueRequest { State = ItemState.Closed, Since = DateTimeOffset.UtcNow.AddDays(-30) });
