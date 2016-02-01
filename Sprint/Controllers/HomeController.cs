@@ -57,7 +57,7 @@ namespace Sprint.Controllers
 
             var allRepos = await _githubClient.Repository.GetAllForCurrent();
 
-            if(!allRepos.Any(x => x.FullName == repository.FullName))
+            if (!allRepos.Any(x => x.FullName == repository.FullName))
             {
                 return View("NotCollaborator", repository);
             }
@@ -175,7 +175,7 @@ namespace Sprint.Controllers
         {
             Ensure.NotNull(ownerName);
             Ensure.NotNull(repoName);
-            
+
             var owner = await _githubClient.User.Get(ownerName);
 
             if (owner == null)
@@ -211,6 +211,51 @@ namespace Sprint.Controllers
             };
             DbContext.Sprints.Add(sprint);
             DbContext.SaveChanges();
+
+            return RedirectToAction("List");
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> NewIssue(string ownerName, string repoName, NewIssueRequest request)
+        {
+            Ensure.NotNull(ownerName);
+            Ensure.NotNull(repoName);
+
+            var owner = await _githubClient.User.Get(ownerName);
+
+            if (owner == null)
+            {
+                return HttpNotFound("owner not found");
+            }
+
+            var repository = await _githubClient.Repository.Get(owner.Login, repoName);
+
+            if (repository == null)
+            {
+                return HttpNotFound("repo not found");
+            }
+
+            var sprint = DbContext.Sprints.SingleOrDefault(x => x.RepoId == repository.Id);
+
+            if (sprint == null)
+            {
+                return HttpNotFound("sprint not found");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View("Request", request);
+            }
+
+            var issue = await _githubClient.Issue.Create(owner.Name, repository.Name, new NewIssue(request.Title));
+            sprint.Issues.Add(new SprintIssue
+            {
+                IssueId = issue.Number,
+                When = DateTimeOffset.Now,
+                SprintId = sprint.Id
+            });
+
+            await DbContext.SaveChangesAsync();
 
             return RedirectToAction("List");
         }
