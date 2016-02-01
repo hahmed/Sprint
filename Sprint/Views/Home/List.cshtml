@@ -6,6 +6,26 @@
     </h2>
 </div>
 <div>
+    <div class="row text-xs-center m-b-3">
+        <div class="col-sm-4">
+            <div class="card card-block text-center card-success inverse-text">
+                <h4 class="card-title text-sm-center"><span class="mega-octicon octicon-issue-opened"></span> Open Issues</h4>
+                <h4 class="card-text">@Model.OpenIssues.Count</h4>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="card card-block text-center  card-info inverse-text">
+                <h4 class="card-title"><span class="mega-octicon  octicon-git-pull-request"></span> Open PR's</h4>
+                <h4 class="card-text">@Model.OpenPRs.Count</h4>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="card card-block text-center card-danger inverse-text">
+                <h4 class="card-title"><span class="mega-octicon  octicon-issue-closed"></span> Recently Closed</h4>
+                <h4 class="card-text">@Model.RecentlyClosed.Count</h4>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <ul class="nav nav-pills nav-stacked col-sm-2">
             <li class="nav-item">
@@ -15,66 +35,43 @@
                 <a class="nav-link" href="@Url.Action("Backlog", "Home")">Backlog</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Roadmap</a>
+                <a class="nav-link" href="@Url.Action("Team")">Team</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Releases</a>
+                <a class="nav-link" href="@Url.Action("Team", "Releases")">Releases</a>
             </li>
         </ul>
-        <div class="col-sm-10">
-            <div class="row text-xs-center">
-                <div class="col-sm-4">
-                    <div class="card card-block text-center card-success inverse-text">
-                        <h4 class="card-title text-sm-center"><span class="mega-octicon octicon-issue-opened"></span> Open Issues</h4>
-                        <h4 class="card-text">@Model.OpenIssues.Count</h4>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="card card-block text-center  card-info inverse-text">
-                        <h4 class="card-title"><span class="mega-octicon  octicon-git-pull-request"></span> Open PR's</h4>
-                        <h4 class="card-text">@Model.OpenPRs.Count</h4>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="card card-block text-center card-danger inverse-text">
-                        <h4 class="card-title"><span class="mega-octicon  octicon-issue-closed"></span> Recently Closed</h4>
-                        <h4 class="card-text">@Model.RecentlyClosed.Count</h4>
-                    </div>
-                </div>
-            </div>
+        <div class="col-sm-10">     
             @if (!Model.Sprint.Issues.Any())
-                {
+            {
                 <div class="card">
                     <div class="card-block text-xs-center m-a-3 p-a-3">
-                        <h2>Your sprint board is lookin kinda empty, wanna add some issues?</h2>
+                        <h2>Your sprint board is lookin kinda empty, wanna <a href="@Url.Action("Backlog")">add</a> some issues?</h2>
                     </div>
                 </div>
-                }
-                else
-                {
-                <div class="card card-block m-a-3 p-a-3">
-                    <ul class="list-group list-group-flush">
-                        @foreach (var item in Model.CurrentSprint)
+            }
+            else
+            {
+                <div>
+                    @foreach (var item in Model.CurrentSprint)
                     {
-                            <li class="list-group-item">
-                                <a href="@Url.Action("RemoveIssue", new { ownerName = Model.Repository.Owner.Login, repoName = Model.Repository.Name, issueId = item.Number })" class="text-warning"><span class="octicon octicon-remove-close"></span></a>
-                                <a href="@item.HtmlUrl">#@item.Number</a> <span>@item.Title</span>
-                                <a href="@Url.Action("CompletedIssue", new { ownerName = Model.Repository.Owner.Login, repoName = Model.Repository.Name, issueId = item.Number })" class="btn btn-success-outline btn-sm"><span class="octicon octicon-issue-closed"></span></a>
-                            </li>
-                            }
-                    </ul>
+                        <div class="card text-xs-center">
+                            <h4 class="card-header">
+                                <a href="@item.HtmlUrl">#@item.Number</a> @item.Title
+                            </h4>
+                            <div class="card-block">
+                                <a href="@Url.Action("CompletedIssue", new { ownerName = Model.Repository.Owner.Login, repoName = Model.Repository.Name, issueId = item.Number })"
+                                   class="btn btn-success-outline"><span class="octicon octicon-issue-closed"></span> Completed</a>
+                                <a href="@Url.Action("RemoveIssue", new { ownerName = Model.Repository.Owner.Login, repoName = Model.Repository.Name, issueId = item.Number })"
+                                   class="btn btn-danger-outline" title="Remove from sprint"><span class="octicon octicon-remove-close"></span> Remove</a>
+                            </div>
+                            <div class="card-text text-muted">
+                                Created on @item.CreatedAt.ToString("dd MMM yy")
+                            </div>
+                        </div>
+                    }
                 </div>
-                }
-            @if (Model.Contributors.Any())
-                {
-                <div class="m-a-2">
-                    <h4>Contributors</h4>
-                    @foreach (var item in Model.Contributors)
-                        {
-                        <img src="@item.AvatarUrl" style="height:20px;width:20px;" title="@item.Login" />
-                        }
-                </div>
-                }
+            }
         </div>
     </div>
 </div>

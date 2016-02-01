@@ -5,7 +5,7 @@ using Octokit;
 
 namespace Sprint.Models
 {
-    public class IndexViewModel
+    public class BacklogViewModel
     {
         /// <summary>
         /// owner of repo
@@ -23,36 +23,20 @@ namespace Sprint.Models
         public IReadOnlyList<Issue> OpenIssues { get; set; }
 
         /// <summary>
-        /// List of Open PR's
-        /// </summary>
-        public IReadOnlyList<Issue> OpenPRs { get; set; }
-
-        /// <summary>
-        /// List of recently closed issues
-        /// </summary>
-        public IReadOnlyList<Issue> RecentlyClosed { get; set; }
-
-        /// <summary>
         /// The current sprint
         /// </summary>
         public Sprint Sprint { get; set; }
 
-        public IList<Issue> CurrentSprint
-        {
-            get
-            {
-                return OpenIssues.Where(x => Sprint.Issues.Any(y => y.IssueId == x.Number)).ToList();
-            }
-        }
 
         public IList<Issue> OpenSprintIssues
         {
             get
             {
-                return (Sprint != null && Sprint.Issues.Any())
+                return (Sprint.Issues.Any())
                         ? OpenIssues.Where(x => !Sprint.Issues.Any(y => y.IssueId == x.Number)).ToList()
                         : OpenIssues.ToList();
             }
         }
     }
+
 }

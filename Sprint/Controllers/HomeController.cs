@@ -82,8 +82,6 @@ namespace Sprint.Controllers
             vm.OpenPRs = issues.Where(x => x.PullRequest != null).ToList();
             vm.RecentlyClosed = await _githubClient.Issue.GetAllForRepository(owner.Login, repository.Name,
                 new RepositoryIssueRequest { State = ItemState.Closed, Since = DateTimeOffset.UtcNow.AddDays(-30) });
-            vm.Contributors = await _githubClient.Repository.GetAllContributors(owner.Login, repository.Name);
-
             return View(vm);
         }
 
@@ -131,6 +129,44 @@ namespace Sprint.Controllers
                 new RepositoryIssueRequest { State = ItemState.Open });
 
             vm.OpenIssues = issues.Where(x => x.PullRequest == null).ToList();
+
+            return View(vm);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> Team(string ownerName, string repoName)
+        {
+            Ensure.NotNull(ownerName);
+            Ensure.NotNull(repoName);
+
+            var owner = await _githubClient.User.Get(ownerName);
+
+            if (owner == null)
+            {
+                return HttpNotFound("owner not found");
+            }
+
+            var repository = await _githubClient.Repository.Get(owner.Login, repoName);
+
+            if (repository == null)
+            {
+                return HttpNotFound("repo not found");
+            }
+
+            var sprint = DbContext.Sprints.Include(x => x.Issues).SingleOrDefault(x => x.RepoId == repository.Id);
+            if (sprint == null)
+            {
+                return HttpNotFound("Sprint board not found");
+            }
+
+            var vm = new TeamViewModel
+            {
+                Owner = owner,
+                Repository = repository,
+                Sprint = sprint
+            };
+
+            vm.Team = await _githubClient.Repository.GetAllContributors(owner.Login, repository.Name);
 
             return View(vm);
         }
@@ -263,7 +299,7 @@ namespace Sprint.Controllers
             DbContext.SprintsIssues.Remove(sprintIssue);
             DbContext.SaveChanges();
 
-            return RedirectToAction("Index");
+            return RedirectToAction("List");
         }
 
         public async Task<ActionResult> CompletedIssue(string ownerName, string repoName, int issueId)

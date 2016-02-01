@@ -134,6 +134,8 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\Extensions.cs" />
+    <Compile Include="Models\TeamViewModel.cs" />
+    <Compile Include="Models\BacklogViewModel.cs" />
     <Compile Include="Models\SprintIssue.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -186,10 +188,10 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Home\List.cshtml" />
-    <Content Include="Views\Home\Backlog2.cshtml" />
     <Content Include="Views\Home\NotCollaborator.cshtml" />
     <Content Include="Views\Home\NoBoard.cshtml" />
     <Content Include="Views\Home\Backlog.cshtml" />
+    <Content Include="Views\Home\Team.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

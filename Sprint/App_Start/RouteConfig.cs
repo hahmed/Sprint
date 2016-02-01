@@ -38,6 +38,12 @@ namespace Sprint
             );
 
             routes.MapRoute(
+                name: "team",
+                url: "{ownerName}/{repoName}/team",
+                defaults: new { controller = "Home", action = "Team" }
+            );
+
+            routes.MapRoute(
                 name: "backlog",
                 url: "{ownerName}/{repoName}/backlog",
                 defaults: new { controller = "Home", action = "Backlog" }
