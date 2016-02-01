@@ -1,0 +1,17 @@
+﻿@model Octokit.Repository
+<div class="text-md-center m-b-3">
+    <h2>
+        <span class="mega-octicon octicon-git-commit"></span>Sprint:  <a href="@Model.HtmlUrl"><strong>@Model.FullName</strong></a>
+        <a href="/" class="btn btn-sm btn-primary-outline">All repos</a>
+    </h2>
+</div>
+<div class="card">
+    <div class="card-block text-xs-center m-a-3 p-a-3">
+        <h2>
+            <span class="bg-primary">You do not have a sprint board set up for this repo.</span>
+        </h2>
+        <p class="m-b-0">
+            <a href="@Url.Action("SetupSprint")" class="btn btn-lg btn-primary"><span class="octicon octicon-plus"></span> Setup my sprint board</a>
+        </p>
+    </div>
+</div>

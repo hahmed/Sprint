@@ -55,19 +55,128 @@ namespace Sprint.Controllers
                 return HttpNotFound("repo not found");
             }
 
-            var vm = new IndexViewModel();
-            var issues = await _githubClient.Issue.GetAllForRepository(owner.Login, repoName,
+            var allRepos = await _githubClient.Repository.GetAllForCurrent();
+
+            if(!allRepos.Any(x => x.FullName == repository.FullName))
+            {
+                return View("NotCollaborator", repository);
+            }
+
+            var sprint = DbContext.Sprints.Include(x => x.Issues).SingleOrDefault(x => x.RepoId == repository.Id);
+            if (sprint == null)
+            {
+                return View("NoBoard", repository);
+            }
+
+            var vm = new IndexViewModel
+            {
+                Owner = owner,
+                Repository = repository,
+                Sprint = sprint
+            };
+
+            var issues = await _githubClient.Issue.GetAllForRepository(owner.Login, repository.Name,
                 new RepositoryIssueRequest { State = ItemState.Open });
+
             vm.OpenIssues = issues.Where(x => x.PullRequest == null).ToList();
             vm.OpenPRs = issues.Where(x => x.PullRequest != null).ToList();
-            vm.RecentlyClosed = await _githubClient.Issue.GetAllForRepository(owner.Login, repoName,
+            vm.RecentlyClosed = await _githubClient.Issue.GetAllForRepository(owner.Login, repository.Name,
                 new RepositoryIssueRequest { State = ItemState.Closed, Since = DateTimeOffset.UtcNow.AddDays(-30) });
-            vm.Sprint = DbContext.Sprints.Include(x => x.Issues).SingleOrDefault(x => x.RepoId == repository.Id);
-            vm.Owner = owner;
-            vm.Repository = repository;
             vm.Contributors = await _githubClient.Repository.GetAllContributors(owner.Login, repository.Name);
 
             return View(vm);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> Backlog(string ownerName, string repoName)
+        {
+            Ensure.NotNull(ownerName);
+            Ensure.NotNull(repoName);
+
+            var owner = await _githubClient.User.Get(ownerName);
+
+            if (owner == null)
+            {
+                return HttpNotFound("owner not found");
+            }
+
+            var repository = await _githubClient.Repository.Get(owner.Login, repoName);
+
+            if (repository == null)
+            {
+                return HttpNotFound("repo not found");
+            }
+
+            var allRepos = await _githubClient.Repository.GetAllForCurrent();
+
+            if (!allRepos.Any(x => x.FullName == repository.FullName))
+            {
+                return View("NotCollaborator", repository);
+            }
+
+            var sprint = DbContext.Sprints.Include(x => x.Issues).SingleOrDefault(x => x.RepoId == repository.Id);
+            if (sprint == null)
+            {
+                return View("NoBoard", repository);
+            }
+
+            var vm = new BacklogViewModel
+            {
+                Owner = owner,
+                Repository = repository,
+                Sprint = sprint
+            };
+
+            var issues = await _githubClient.Issue.GetAllForRepository(owner.Login, repository.Name,
+                new RepositoryIssueRequest { State = ItemState.Open });
+
+            vm.OpenIssues = issues.Where(x => x.PullRequest == null).ToList();
+
+            return View(vm);
+        }
+
+        public async Task<ActionResult> SetupSprint(string ownerName, string repoName)
+        {
+            Ensure.NotNull(ownerName);
+            Ensure.NotNull(repoName);
+            
+            var owner = await _githubClient.User.Get(ownerName);
+
+            if (owner == null)
+            {
+                return HttpNotFound("owner not found");
+            }
+
+            var repository = await _githubClient.Repository.Get(owner.Login, repoName);
+
+            if (repository == null)
+            {
+                return HttpNotFound("repo not found");
+            }
+
+            var allRepos = await _githubClient.Repository.GetAllForCurrent();
+            var isCollaborator = allRepos.Any(x => x.FullName == repository.FullName);
+
+            if (!isCollaborator)
+            {
+                return HttpNotFound("You are not a collaborator for this repo");
+            }
+
+            var sprint = DbContext.Sprints.SingleOrDefault(x => x.RepoId == repository.Id);
+
+            if (sprint != null)
+            {
+                return RedirectToAction("List"); // sprint board already setup
+            }
+
+            sprint = new Models.Sprint
+            {
+                RepoId = repository.Id
+            };
+            DbContext.Sprints.Add(sprint);
+            DbContext.SaveChanges();
+
+            return RedirectToAction("List");
         }
 
         public async Task<ActionResult> AddIssue(string ownerName, string repoName, int issueId)
@@ -89,24 +198,18 @@ namespace Sprint.Controllers
                 return HttpNotFound("repo not found");
             }
 
+            var sprint = DbContext.Sprints.SingleOrDefault(x => x.RepoId == repository.Id);
+
+            if (sprint == null)
+            {
+                return HttpNotFound("sprint not found");
+            }
+
             var issue = await _githubClient.Issue.Get(owner.Login, repoName, issueId);
 
             if (issue == null)
             {
                 return HttpNotFound("issue not found");
-            }
-
-            // get the sprint for this repo, if it does not exist... create it.
-            var sprint = DbContext.Sprints.SingleOrDefault(x => x.RepoId == repository.Id);
-
-            if (sprint == null)
-            {
-                sprint = new Models.Sprint
-                {
-                    RepoId = repository.Id
-                };
-                DbContext.Sprints.Add(sprint);
-                DbContext.SaveChanges();
             }
 
             // create the related sprint issue
@@ -141,18 +244,18 @@ namespace Sprint.Controllers
                 return HttpNotFound("repo not found");
             }
 
-            var issue = await _githubClient.Issue.Get(owner.Login, repoName, issueId);
-
-            if (issue == null)
-            {
-                return HttpNotFound("issue not found");
-            }
-
             var sprint = DbContext.Sprints.Include(x => x.Issues).SingleOrDefault(x => x.RepoId == repository.Id);
 
             if (sprint == null)
             {
                 return HttpNotFound("sprint not found");
+            }
+
+            var issue = await _githubClient.Issue.Get(owner.Login, repoName, issueId);
+
+            if (issue == null)
+            {
+                return HttpNotFound("issue not found");
             }
 
             var sprintIssue = sprint.Issues.SingleOrDefault(x => x.IssueId == issue.Number);
