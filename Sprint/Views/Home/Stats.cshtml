@@ -1,0 +1,52 @@
+﻿@model Sprint.Models.StatsViewModel
+<div class="text-md-center m-b-3">
+    <h2>
+        Some stats for ya!
+        <a href="/" class="btn btn-sm btn-primary-outline">Home</a>
+    </h2>
+</div>
+<div class="card">
+    <div class="card-block text-xs-center">
+        <h2 class="card-title">
+            Most starred repo this year in csharp
+        </h2>
+    </div>
+    <ul class="list-group list-group-flush">
+        @foreach (var item in Model.MostStarred)
+        {
+            <li class="list-group-item">
+                <h4><a href="@item.HtmlUrl">@item.FullName</a> <span class="label label-pill label-info pull-sm-right">@item.StargazersCount</span></h4>
+            </li>
+        }
+    </ul>
+</div>
+<div class="card">
+    <div class="card-block text-xs-center">
+        <h2 class="card-title">
+            Most commented ruby issue this year
+        </h2>
+    </div>
+    <ul class="list-group list-group-flush">
+        @foreach (var item in Model.MostCommentedIssue)
+        {
+            <li class="list-group-item">
+                <h4><a href="@item.HtmlUrl">#@item.Number</a> @item.Title<span class="label label-pill label-info pull-sm-right">@item.Comments</span></h4>
+            </li>
+        }
+    </ul>
+</div>
+<div class="card">
+    <div class="card-block text-xs-center">
+        <h2 class="card-title">
+            Preferred day opening issues on rails repo this year
+        </h2>
+    </div>
+    <ul class="list-group list-group-flush">
+        @foreach (var item in Model.RailsIssues)
+        {
+            <li class="list-group-item">
+                <h4>@item.Key - @item.Value.Count</h4>
+            </li>
+        }
+    </ul>
+</div>

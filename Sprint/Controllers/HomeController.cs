@@ -58,7 +58,7 @@ namespace Sprint.Controllers
             var request = new PullRequestRequest();
             var results = new Dictionary<string, List<PullRequest>>();
             var pullRequests = await _githubClient.PullRequest.GetAllForRepository(owner.Login, repository.Name, request);
-            
+
             // for each pull request, get the files and associate with the pr number
             foreach (var pr in pullRequests)
             {
@@ -85,6 +85,58 @@ namespace Sprint.Controllers
                 Repository = repository,
                 PullRequests = sortbyPopularity
             };
+
+            return View(vm);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> Stats()
+        {
+            var vm = new StatsViewModel();
+
+            var issueSearch = new SearchIssuesRequest
+            {
+                Comments = Range.GreaterThan(25),
+                Created = DateRange.GreaterThan(new DateTime(DateTime.Now.Year, 01, 01)),
+                SortField = IssueSearchSort.Comments,
+                Language = Language.Ruby,
+                Order = SortDirection.Descending
+            };
+            var mostCommented = await _githubClient.Search.SearchIssues(issueSearch);
+            vm.MostCommentedIssue = mostCommented.Items.OrderByDescending(x=> x.Comments).Take(10).ToList();
+
+            var repoSearch = new SearchRepositoriesRequest
+            {
+                Created = DateRange.GreaterThan(new DateTime(DateTime.Now.Year, 01, 01)),
+                Language = Language.CSharp,
+                SortField = RepoSearchSort.Stars,
+                Order = SortDirection.Descending
+            };
+            var mostStarred = await _githubClient.Search.SearchRepo(repoSearch);
+            vm.MostStarred = mostStarred.Items.Take(10).ToList();
+
+            var repo = new RepositoryCollection();
+            repo.Add("rails", "rails");
+            issueSearch = new SearchIssuesRequest
+            {
+                 Repos = repo,
+                 Created = DateRange.GreaterThan(new DateTime(DateTime.Now.Year, 01, 01)),
+            };
+            var railsIssues = await _githubClient.Search.SearchIssues(issueSearch);
+            var dic = new Dictionary<DayOfWeek, List<Issue>>();
+            foreach (var issue in railsIssues.Items)
+            {
+                if(dic.ContainsKey(issue.CreatedAt.DayOfWeek))
+                {
+                    dic[issue.CreatedAt.DayOfWeek].Add(issue);
+                }
+                else
+                {
+                    dic.Add(issue.CreatedAt.DayOfWeek, new List<Issue> { issue });
+                }
+            }
+
+            vm.RailsIssues = dic;
 
             return View(vm);
         }
