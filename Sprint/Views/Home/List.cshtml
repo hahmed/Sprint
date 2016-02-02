@@ -6,23 +6,21 @@
     </h2>
 </div>
 <div>
-    <div class="row text-xs-center m-b-3">
+    <div class="row text-xs-center m-b-2">
         <div class="col-sm-4">
-            <div class="card card-block text-center card-success inverse-text">
-                <h4 class="card-title text-sm-center"><span class="mega-octicon octicon-issue-opened"></span> Open Issues</h4>
-                <h4 class="card-text">@Model.OpenIssues.Count</h4>
+            <div class="card card-block text-sm-center card-success inverse-text">
+                <h4 class="card-title m-a-0"><span class="mega-octicon octicon-issue-opened"></span> <strong>@Model.OpenIssues.Count</strong> Open Issues</h4>
+                
             </div>
         </div>
         <div class="col-sm-4">
-            <div class="card card-block text-center  card-info inverse-text">
-                <h4 class="card-title"><span class="mega-octicon  octicon-git-pull-request"></span> Open PR's</h4>
-                <h4 class="card-text">@Model.OpenPRs.Count</h4>
+            <div class="card card-block text-sm-center  card-info inverse-text">
+                <h4 class="card-title m-a-0"><span class="mega-octicon  octicon-git-pull-request"></span> <strong>@Model.OpenPRs.Count</strong> Open PR's</h4>
             </div>
         </div>
         <div class="col-sm-4">
-            <div class="card card-block text-center card-danger inverse-text">
-                <h4 class="card-title"><span class="mega-octicon  octicon-issue-closed"></span> Recently Closed</h4>
-                <h4 class="card-text">@Model.RecentlyClosed.Count</h4>
+            <div class="card card-block text-sm-center card-danger inverse-text">
+                <h4 class="card-title m-a-0"><span class="mega-octicon  octicon-issue-closed"></span> <strong>@Model.RecentlyClosed.Count</strong> Recently Closed</h4>              
             </div>
         </div>
     </div>
