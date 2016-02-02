@@ -134,6 +134,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\Extensions.cs" />
+    <Compile Include="Models\PullRequestReviewViewModel.cs" />
     <Compile Include="Models\NewIssueRequest.cs" />
     <Compile Include="Models\TeamViewModel.cs" />
     <Compile Include="Models\BacklogViewModel.cs" />
@@ -192,7 +193,7 @@
     <Content Include="Views\Home\NotCollaborator.cshtml" />
     <Content Include="Views\Home\NoBoard.cshtml" />
     <Content Include="Views\Home\Backlog.cshtml" />
-    <Content Include="Views\Home\Team.cshtml" />
+    <Content Include="Views\Home\PRReviews.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

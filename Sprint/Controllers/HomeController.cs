@@ -8,7 +8,7 @@ using System.Data.Entity;
 using Octokit;
 using Octokit.Internal;
 using Sprint.Models;
-
+using System.Collections.Generic;
 
 namespace Sprint.Controllers
 {
@@ -33,6 +33,60 @@ namespace Sprint.Controllers
         {
             var repos = await _githubClient.Repository.GetAllForCurrent();
             return View(repos);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> PRReviews(string ownerName, string repoName)
+        {
+            Ensure.NotNull(ownerName);
+            Ensure.NotNull(repoName);
+
+            var owner = await _githubClient.User.Get(ownerName);
+
+            if (owner == null)
+            {
+                return HttpNotFound("owner not found");
+            }
+
+            var repository = await _githubClient.Repository.Get(owner.Login, repoName);
+
+            if (repository == null)
+            {
+                return HttpNotFound("repo not found");
+            }
+
+            var request = new PullRequestRequest();
+            var results = new Dictionary<string, List<PullRequest>>();
+            var pullRequests = await _githubClient.PullRequest.GetAllForRepository(owner.Login, repository.Name, request);
+            
+            // for each pull request, get the files and associate with the pr number
+            foreach (var pr in pullRequests)
+            {
+                var files = await _githubClient.PullRequest.Files(owner.Login, repository.Name, pr.Number);
+                foreach (var file in files)
+                {
+                    if (results.ContainsKey(file.FileName))
+                    {
+                        results[file.FileName].Add(pr);
+                    }
+                    else
+                    {
+                        var list = new List<PullRequest> { pr };
+                        results.Add(file.FileName, list);
+                    }
+                }
+            }
+
+            var sortbyPopularity = results.OrderByDescending(kvp => kvp.Value.Count);
+
+            var vm = new PullRequestReviewViewModel
+            {
+                Owner = owner,
+                Repository = repository,
+                PullRequests = sortbyPopularity
+            };
+
+            return View(vm);
         }
 
         [HttpGet]
@@ -122,51 +176,14 @@ namespace Sprint.Controllers
             {
                 Owner = owner,
                 Repository = repository,
-                Sprint = sprint
+                Sprint = sprint,
+                NewIssueRequest = new NewIssueRequest()
             };
 
             var issues = await _githubClient.Issue.GetAllForRepository(owner.Login, repository.Name,
                 new RepositoryIssueRequest { State = ItemState.Open });
 
             vm.OpenIssues = issues.Where(x => x.PullRequest == null).ToList();
-
-            return View(vm);
-        }
-
-        [HttpGet]
-        public async Task<ActionResult> Team(string ownerName, string repoName)
-        {
-            Ensure.NotNull(ownerName);
-            Ensure.NotNull(repoName);
-
-            var owner = await _githubClient.User.Get(ownerName);
-
-            if (owner == null)
-            {
-                return HttpNotFound("owner not found");
-            }
-
-            var repository = await _githubClient.Repository.Get(owner.Login, repoName);
-
-            if (repository == null)
-            {
-                return HttpNotFound("repo not found");
-            }
-
-            var sprint = DbContext.Sprints.Include(x => x.Issues).SingleOrDefault(x => x.RepoId == repository.Id);
-            if (sprint == null)
-            {
-                return HttpNotFound("Sprint board not found");
-            }
-
-            var vm = new TeamViewModel
-            {
-                Owner = owner,
-                Repository = repository,
-                Sprint = sprint
-            };
-
-            vm.Team = await _githubClient.Repository.GetAllContributors(owner.Login, repository.Name);
 
             return View(vm);
         }
@@ -216,6 +233,7 @@ namespace Sprint.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> NewIssue(string ownerName, string repoName, NewIssueRequest request)
         {
             Ensure.NotNull(ownerName);
@@ -244,18 +262,39 @@ namespace Sprint.Controllers
 
             if (!ModelState.IsValid)
             {
-                return View("Request", request);
+                // as there is an issue with the model state, we will return the view
+                // just need to populate the vm to do just that... normally we would PRG right here
+
+                var vm = new BacklogViewModel
+                {
+                    Owner = owner,
+                    Repository = repository,
+                    Sprint = sprint,
+                    NewIssueRequest = request
+                };
+
+                var issues = await _githubClient.Issue.GetAllForRepository(owner.Login, repository.Name,
+                    new RepositoryIssueRequest { State = ItemState.Open });
+
+                vm.OpenIssues = issues.Where(x => x.PullRequest == null).ToList();
+
+                return View("Backlog", vm);
             }
 
             var issue = await _githubClient.Issue.Create(owner.Name, repository.Name, new NewIssue(request.Title));
-            sprint.Issues.Add(new SprintIssue
-            {
-                IssueId = issue.Number,
-                When = DateTimeOffset.Now,
-                SprintId = sprint.Id
-            });
 
-            await DbContext.SaveChangesAsync();
+            // we add the issue to the sprint
+            if (request.AddToSprint)
+            {
+                sprint.Issues.Add(new SprintIssue
+                {
+                    IssueId = issue.Number,
+                    When = DateTimeOffset.Now,
+                    SprintId = sprint.Id
+                });
+
+                await DbContext.SaveChangesAsync();
+            }
 
             return RedirectToAction("List");
         }

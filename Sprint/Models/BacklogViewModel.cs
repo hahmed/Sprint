@@ -37,6 +37,7 @@ namespace Sprint.Models
                         : OpenIssues.ToList();
             }
         }
-    }
 
+        public NewIssueRequest NewIssueRequest { get; set; }
+    }
 }
