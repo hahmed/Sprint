@@ -2,11 +2,12 @@
 
 Sample asp.net/mvc app showing how to use the github api via octokit.net [https://github.com/octokit/octokit.net]
 
-### Scenario
+This example includes:
+- Simple sprint board that shows backlog and current issues being worked on
+- Sample of how to use the search api 
+- Example of showing number of PR's associated to a file
 
-The bosses sometimes don't wanna login to GitHub, they want work done, fast. So we created the sprint board. A simple agile concept where our bosses can see our current workload.
-
-Add and remove issues to the sprint board, once they are done, close them right off.
+If there are any other samples you want to see, let me know - or better yet, open up a PR.
 
 ### Build and running
 
