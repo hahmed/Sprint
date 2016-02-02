@@ -5,19 +5,28 @@
     </h2>
 </div>
 <div>
-    @foreach (var pr in Model.PullRequests)
+    @if (!Model.PullRequests.Any())
     {
-        <div class="card">
-            <h4 class="card-header m-b-0">@pr.Key <span class="label label-pill label-info">@pr.Value.Count</span></h4>
-            <ul class="list-group list-group-flush">
-                @foreach (var item in pr.Value)
-                {
-                    <li class="list-group-item">
-                        <h5 class="card-title m-b-0"><a target="_blank" href="@item.HtmlUrl" class="btn btn-success-outline btn-sm pull-sm-right">#@item.Number</a> @item.Title</h5>
-                        <p class="card-text text-muted"><img src="@item.User.AvatarUrl" style="width:30px;height:30px;" /> Opened by <a href="@item.User.HtmlUrl">@item.User.Login</a> on @item.CreatedAt.ToString("dd MMM yy")</p>
-                    </li>
-                }
-            </ul>
+        <div class="card card-block">
+            <h3 class="card-title m-a-3 p-a-3 text-sm-center">You do not have any PR's to review...</h3>
         </div>
+    }
+    else
+    {
+        foreach (var pr in Model.PullRequests)
+        {
+            <div class="card">
+                <h4 class="card-header m-b-0">@pr.Key <span class="label label-pill label-info">@pr.Value.Count</span></h4>
+                <ul class="list-group list-group-flush">
+                    @foreach (var item in pr.Value)
+                    {
+                        <li class="list-group-item">
+                            <h5 class="card-title m-b-0"><a target="_blank" href="@item.HtmlUrl" class="btn btn-success-outline btn-sm pull-sm-right">#@item.Number</a> @item.Title</h5>
+                            <p class="card-text text-muted"><img src="@item.User.AvatarUrl" style="width:30px;height:30px;" /> Opened by <a href="@item.User.HtmlUrl">@item.User.Login</a> on @item.CreatedAt.ToString("dd MMM yy")</p>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
     }
 </div>

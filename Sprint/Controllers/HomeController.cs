@@ -139,55 +139,6 @@ namespace Sprint.Controllers
             return View(vm);
         }
 
-        [HttpGet]
-        public async Task<ActionResult> Backlog(string ownerName, string repoName)
-        {
-            Ensure.NotNull(ownerName);
-            Ensure.NotNull(repoName);
-
-            var owner = await _githubClient.User.Get(ownerName);
-
-            if (owner == null)
-            {
-                return HttpNotFound("owner not found");
-            }
-
-            var repository = await _githubClient.Repository.Get(owner.Login, repoName);
-
-            if (repository == null)
-            {
-                return HttpNotFound("repo not found");
-            }
-
-            var allRepos = await _githubClient.Repository.GetAllForCurrent();
-
-            if (!allRepos.Any(x => x.FullName == repository.FullName))
-            {
-                return View("NotCollaborator", repository);
-            }
-
-            var sprint = DbContext.Sprints.Include(x => x.Issues).SingleOrDefault(x => x.RepoId == repository.Id);
-            if (sprint == null)
-            {
-                return View("NoBoard", repository);
-            }
-
-            var vm = new BacklogViewModel
-            {
-                Owner = owner,
-                Repository = repository,
-                Sprint = sprint,
-                NewIssueRequest = new NewIssueRequest()
-            };
-
-            var issues = await _githubClient.Issue.GetAllForRepository(owner.Login, repository.Name,
-                new RepositoryIssueRequest { State = ItemState.Open });
-
-            vm.OpenIssues = issues.Where(x => x.PullRequest == null).ToList();
-
-            return View(vm);
-        }
-
         public async Task<ActionResult> SetupSprint(string ownerName, string repoName)
         {
             Ensure.NotNull(ownerName);
@@ -228,73 +179,6 @@ namespace Sprint.Controllers
             };
             DbContext.Sprints.Add(sprint);
             DbContext.SaveChanges();
-
-            return RedirectToAction("List");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> NewIssue(string ownerName, string repoName, NewIssueRequest request)
-        {
-            Ensure.NotNull(ownerName);
-            Ensure.NotNull(repoName);
-
-            var owner = await _githubClient.User.Get(ownerName);
-
-            if (owner == null)
-            {
-                return HttpNotFound("owner not found");
-            }
-
-            var repository = await _githubClient.Repository.Get(owner.Login, repoName);
-
-            if (repository == null)
-            {
-                return HttpNotFound("repo not found");
-            }
-
-            var sprint = DbContext.Sprints.SingleOrDefault(x => x.RepoId == repository.Id);
-
-            if (sprint == null)
-            {
-                return HttpNotFound("sprint not found");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                // as there is an issue with the model state, we will return the view
-                // just need to populate the vm to do just that... normally we would PRG right here
-
-                var vm = new BacklogViewModel
-                {
-                    Owner = owner,
-                    Repository = repository,
-                    Sprint = sprint,
-                    NewIssueRequest = request
-                };
-
-                var issues = await _githubClient.Issue.GetAllForRepository(owner.Login, repository.Name,
-                    new RepositoryIssueRequest { State = ItemState.Open });
-
-                vm.OpenIssues = issues.Where(x => x.PullRequest == null).ToList();
-
-                return View("Backlog", vm);
-            }
-
-            var issue = await _githubClient.Issue.Create(owner.Name, repository.Name, new NewIssue(request.Title));
-
-            // we add the issue to the sprint
-            if (request.AddToSprint)
-            {
-                sprint.Issues.Add(new SprintIssue
-                {
-                    IssueId = issue.Number,
-                    When = DateTimeOffset.Now,
-                    SprintId = sprint.Id
-                });
-
-                await DbContext.SaveChangesAsync();
-            }
 
             return RedirectToAction("List");
         }

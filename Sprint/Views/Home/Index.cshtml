@@ -1,7 +1,7 @@
 ﻿@model IReadOnlyList<Octokit.Repository>
 <div class="text-md-center">
     <h2>
-        <span class="mega-octicon octicon-git-commit"></span>Sprint all tha way.
+        Examples of using GitHub api via Octokit.net
     </h2>
 </div>
 @if (!Model.Any())
@@ -13,22 +13,22 @@
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
                 <h4>
-                    <a href="/Octokit/Octokit.net/" class="text-primary"><span class="octicon octicon-circuit-board"></span> <span>Octokit/Octokit.net</span></a>
+                    <a href="/Octokit/Octokit.net/" class="text-primary"><span>Octokit/Octokit.net</span></a>
                 </h4>
             </li>
             <li class="list-group-item">
                 <h4>
-                    <a href="/ruby/ruby/" class="text-primary"><span class="octicon octicon-circuit-board"></span> <span>Ruby/Ruby</span></a>
+                    <a href="/ruby/ruby/" class="text-primary"><span>Ruby/Ruby</span></a>
                 </h4>
             </li>
             <li class="list-group-item">
                 <h4>
-                    <a href="/rails/rails/" class="text-primary"><span class="octicon octicon-circuit-board"></span> <span>Rails/Rails</span></a>
+                    <a href="/rails/rails/" class="text-primary"> <span>Rails/Rails</span></a>
                 </h4>
             </li>
             <li class="list-group-item">
                 <h4>
-                    <a href="/jquery/jquery/" class="text-primary"><span class="octicon octicon-circuit-board"></span> <span>Jquery/Jquery</span></a>
+                    <a href="/jquery/jquery/" class="text-primary"> <span>Jquery/Jquery</span></a>
                 </h4>
             </li>
         </ul>
@@ -42,7 +42,13 @@ else
                 {
                 <li class="list-group-item">
                     <h4>
-                        <a href="@Url.Action("List", new { ownerName = item.Owner.Login, repoName = item.Name })" class="text-primary"><span class="octicon octicon-circuit-board"></span> <span>@item.FullName</span></a>
+                        <span>@item.FullName</span> 
+                        <span class="pull-sm-right">
+                            <a href="@Url.Action("PRReviews", new { ownerName = item.Owner.Login, repoName = item.Name })"
+                               class="btn btn-success-outline btn-sm" style="">PR Reviews</a>
+                            <a href="@Url.Action("List", new { ownerName = item.Owner.Login, repoName = item.Name })"
+                               class="btn btn-info-outline btn-sm">Sprint</a>
+                        </span>
                     </h4>
                 </li>
             }

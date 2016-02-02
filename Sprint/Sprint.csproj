@@ -135,9 +135,6 @@
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\Extensions.cs" />
     <Compile Include="Models\PullRequestReviewViewModel.cs" />
-    <Compile Include="Models\NewIssueRequest.cs" />
-    <Compile Include="Models\TeamViewModel.cs" />
-    <Compile Include="Models\BacklogViewModel.cs" />
     <Compile Include="Models\SprintIssue.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

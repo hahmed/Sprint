@@ -45,7 +45,7 @@ namespace Sprint
 
             routes.MapRoute(
                 name: "sprint_list",
-                url: "{ownerName}/{repoName}/",
+                url: "{ownerName}/{repoName}/sprint",
                 defaults: new { controller = "Home", action = "List" }
             );
 

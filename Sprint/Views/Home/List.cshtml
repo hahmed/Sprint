@@ -2,7 +2,7 @@
 <div class="text-md-center m-b-3">
     <h2>
         <span class="mega-octicon octicon-git-commit"></span>Sprint:  <a href="@Model.Repository.HtmlUrl"><strong>@Model.Repository.FullName</strong></a>
-        <a href="/" class="btn btn-sm btn-primary-outline">All repos</a>
+        <a href="/" class="btn btn-sm btn-primary-outline">Home</a>
     </h2>
 </div>
 <div>
@@ -25,26 +25,13 @@
         </div>
     </div>
     <div class="row">
-        <ul class="nav nav-pills nav-stacked col-sm-2">
-            <li class="nav-item">
-                <a class="nav-link active" href="@Url.Action("List", "Home")">Current Sprint</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Backlog", "Home")">Backlog</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Team")">Team</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="@Url.Action("Team", "Releases")">Releases</a>
-            </li>
-        </ul>
-        <div class="col-sm-10">     
+        <div class="col-sm-6">
+            <h4 class="text-sm-center">Sprint board</h4>     
             @if (!Model.Sprint.Issues.Any())
             {
                 <div class="card">
                     <div class="card-block text-xs-center m-a-3 p-a-3">
-                        <h2>Your sprint board is lookin kinda empty, wanna <a href="@Url.Action("Backlog")">add</a> some issues?</h2>
+                        <h2>Your board is kinda empty, wanna add some issues?</h2>
                     </div>
                 </div>
             }
@@ -62,6 +49,37 @@
                                    class="btn btn-success-outline"><span class="octicon octicon-issue-closed"></span> Completed</a>
                                 <a href="@Url.Action("RemoveIssue", new { ownerName = Model.Repository.Owner.Login, repoName = Model.Repository.Name, issueId = item.Number })"
                                    class="btn btn-danger-outline" title="Remove from sprint"><span class="octicon octicon-remove-close"></span> Remove</a>
+                            </div>
+                            <div class="card-text text-muted">
+                                Created on @item.CreatedAt.ToString("dd MMM yy")
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+        <div class="col-sm-6">
+            <h4 class="text-sm-center">Backlog</h4>
+            @if (!Model.OpenSprintIssues.Any())
+            {
+                <div class="card">
+                    <div class="card-block text-xs-center m-a-3 p-a-3">
+                        <h2>You do not have any open issues on your repo.</h2>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div>
+                    @foreach (var item in Model.OpenSprintIssues)
+                    {
+                        <div class="card text-xs-center">
+                            <h4 class="card-header">
+                                <a href="@item.HtmlUrl">#@item.Number</a> @item.Title
+                            </h4>
+                            <div class="card-block">
+                                <a href="@Url.Action("AddIssue", new { ownerName = Model.Repository.Owner.Login, repoName = Model.Repository.Name, issueId = item.Number })"
+                                   class="btn btn-success-outline" title="Add to sprint"><span class="octicon octicon-plus"></span> Add</a>
                             </div>
                             <div class="card-text text-muted">
                                 Created on @item.CreatedAt.ToString("dd MMM yy")
